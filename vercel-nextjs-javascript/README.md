@@ -1,34 +1,124 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TiDB Serverless Next.js Hello World
 
-## Getting Started
+Self-hosted or Vercel-hosted Next.js app that connects to a TiDB Serverless cluster.
 
-First, run the development server:
+Live demo: TODO
+
+- Framework: [Next.js](https://nextjs.org/)
+- Driver: [MySQL2](https://github.com/sidorares/node-mysql2)
+- Deployment(optional): [Vercel](https://vercel.com/)
+
+## Prerequisites
+
+- [TiDB Serverless cluster](https://docs.pingcap.com/tidbcloud/tidbcloud-overview)
+- [Node.js](https://nodejs.org/en/) >= 18.0.0
+- [Yarn](https://yarnpkg.com/) >= 1.22.0
+
+## Steps
+
+### 1. Clone this repo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+git clone TODO
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Define Route Handler
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+> Route Handlers allow you to create custom request handlers for a given route using the Web Request and Response APIs. (https://nextjs.org/docs/app/building-your-application/routing/router-handlers)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Example Route: `/api/hello`
 
-## Learn More
+Example File: [`src/app/api/hello/route.js`](src/app/api/hello/route.js)
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Configure Database Connection
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Refer to [`src/app/api/hello/route.js#L4`](src/app/api/hello/route.js#L4)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```javascript
+import mysql from 'mysql2';
 
-## Deploy on Vercel
+const pool = mysql.createPool({
+  host, // TiDB Serverless cluster endpoint
+  port, // TiDB Serverless cluster port, 4000 is the default
+  user, // TiDB Serverless cluster user
+  password, // TiDB Serverless cluster password
+  database, // TiDB Serverless cluster database, 'test' is the default
+  ssl: {  // TiDB Serverless cluster SSL config(required)
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true,
+  },
+  ... // other mysql2 config
+});
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Configure Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+_Ignore this step if you are using Vercel-hosted deployment._
+
+You need to configure the following environment variables:
+
+```bash
+TIDB_HOST="your_tidb_serverless_cluster_endpoint"
+TIDB_PORT=4000
+TIDB_USER="your_tidb_serverless_cluster_user"
+TIDB_PASSWORD="your_tidb_serverless_cluster_password"
+```
+
+### 5. Define Database Query
+
+Refer to [`src/app/api/hello/route.js#L33`](src/app/api/hello/route.js#L33)
+
+```javascript
+  singleQuery(sql) {
+    return new Promise((resolve, reject) => {
+      this.pool.query(sql, (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ results, fields });
+        }
+      });
+    });
+  }
+```
+
+### 6. Define Route Handler
+
+Refer to [`src/app/api/hello/route.js#L46`](src/app/api/hello/route.js#L46)
+
+```javascript
+import { NextResponse } from 'next/server';
+
+export async function GET(request) {
+  const dataService = new DataService();
+
+  try {
+    const { results } = await dataService.singleQuery('SELECT "Hello World";');
+    return NextResponse.json({ results });
+  } catch (error) {
+    return NextResponse.error(error);
+  }
+}
+```
+
+Now you can test the route handler locally:
+
+```bash
+# Install dependencies
+yarn
+# start the app
+yarn dev
+
+# test the route handler
+curl http://localhost:3000/api/hello
+```
+
+## Vercel-hosted Deployment(Optional)
+
+1. Visit [Vercel](https://vercel.com/) and sign up for an account.
+2. Go to Dashboard and click `New Project`.
+3. Select `Import Git Repository` and import this repo.
+4. Click `Deploy` and wait for the deployment to finish.
+5. Visit [Vercel `TiDB Cloud` integration](https://vercel.com/integrations/tidb-cloud) page, and click `Add Integration`.
+
+After you have configured the integration, all the environment variables will be automatically set.
