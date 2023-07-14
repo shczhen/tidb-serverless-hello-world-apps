@@ -10,7 +10,7 @@ Live demo: TODO
 
 ## Prerequisites
 
-- [TiDB Serverless cluster](https://docs.pingcap.com/tidbcloud/tidbcloud-overview)
+- [TiDB Serverless cluster](https://www.pingcap.com/tidb-serverless/)
 - [Node.js](https://nodejs.org/en/) >= 18.0.0
 - [Yarn](https://yarnpkg.com/) >= 1.22.0
 
