@@ -41,6 +41,18 @@ class DataService {
       });
     });
   }
+
+  async close() {
+    return new Promise((resolve, reject) => {
+      this.pool.end((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
 }
 
 export async function GET(request) {
@@ -51,5 +63,7 @@ export async function GET(request) {
     return NextResponse.json({ results });
   } catch (error) {
     return NextResponse.error(error);
+  } finally {
+    await dataService.close();
   }
 }
