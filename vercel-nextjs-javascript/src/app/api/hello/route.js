@@ -7,7 +7,7 @@ class DataService {
     port = process.env.TIDB_PORT,
     user = process.env.TIDB_USER,
     password = process.env.TIDB_PASSWORD,
-    database = 'test'
+    database = process.env.TIDB_DB_NAME || 'test'
   ) {
     const pool = mysql.createPool({
       host,
