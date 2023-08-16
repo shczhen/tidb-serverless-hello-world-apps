@@ -23,7 +23,6 @@ export default function SQLSection() {
     setIsLoading(true);
     const { data, error } = await retriveData();
     console.log(data);
-    console.log(JSON.stringify(data, null, 2));
     console.error(error);
     if (error) {
       setError(error);
@@ -49,7 +48,7 @@ export default function SQLSection() {
               viewBox='0 0 24 24'
               strokeWidth='1.5'
               stroke='currentColor'
-              class='w-6 h-6'
+              className='w-6 h-6'
             >
               <path
                 strokeLinecap='round'
@@ -63,7 +62,7 @@ export default function SQLSection() {
 
         <div className='mockup-code'>
           <pre data-prefix='>'>
-            <code>SELECT "Hello World";</code>
+            <code>{`SELECT "Hello World";`}</code>
           </pre>
           {(results || error) && <pre data-prefix=''> </pre>}
           {results && stringifyIntoLines(results, 'error')}
